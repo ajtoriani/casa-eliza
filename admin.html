@@ -3,169 +3,671 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel da Eliza - Casa da Eliza</title>
+    <title>Painel Administrativo | Casa da Eliza</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
     <style>
-        body { font-family: 'Nunito', sans-serif; background: #f7efe5; padding: 20px; color: #43210f; }
-        .container { max-width: 400px; margin: 0 auto; background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
-        input, select, button { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; font-size: 1rem; }
-        button { background: #bd7b4c; color: white; font-weight: bold; cursor: pointer; border: none; transition: 0.2s; }
-        button:hover { background: #a66a3e; }
-        #status { font-weight: bold; text-align: center; margin-bottom: 15px; font-size: 0.9rem; }
+        :root {
+            --bg-body: #f7efe5;
+            --bg-card: #ffffff;
+            --primary: #bd7b4c;
+            --primary-hover: #a66a3e;
+            --secondary: #4a260f;
+            --text-main: #43210f;
+            --text-muted: #7c6659;
+            --success: #2ecc71;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --info: #3498db;
+            --border: #e8dccf;
+            --radius: 16px;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Nunito', sans-serif; background: var(--bg-body); color: var(--text-main); padding-bottom: 50px; }
+        
+        .header { background: var(--secondary); color: white; padding: 18px 20px; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .header-content { max-width: 900px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+        .header h1 { font-family: 'Fredoka', sans-serif; font-size: 1.4rem; color: #f4e6d6; }
+        .btn-logout { background: rgba(255,255,255,0.15); color: white; border: none; padding: 8px 14px; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 0.85rem; transition: 0.2s; }
+        .btn-logout:hover { background: var(--danger); }
+
+        .container { max-width: 900px; margin: 20px auto; padding: 0 16px; }
+
+        /* TELA LOGIN */
+        .login-card { max-width: 400px; margin: 60px auto; background: white; padding: 30px; border-radius: var(--radius); box-shadow: var(--shadow); text-align: center; border: 1px solid var(--border); }
+        .login-card h2 { font-family: 'Fredoka', sans-serif; color: var(--primary); margin-bottom: 8px; font-size: 1.6rem; }
+
+        /* CARDS E GRIDS */
+        .dashboard-grid { display: grid; gap: 20px; }
+        .card { background: white; border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); border: 1px solid var(--border); margin-bottom: 20px; }
+        .card-title { font-family: 'Fredoka', sans-serif; font-size: 1.2rem; margin-bottom: 15px; color: var(--secondary); display: flex; align-items: center; gap: 8px; }
+
+        /* 📊 RECURSO 3: CARDS DE RESUMO RÁPIDO */
+        .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 20px; }
+        .metric-card { background: white; padding: 16px; border-radius: 12px; border: 1px solid var(--border); display: flex; align-items: center; gap: 12px; box-shadow: var(--shadow); }
+        .metric-icon { width: 46px; height: 46px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0; }
+        .metric-info h5 { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; }
+        .metric-info p { font-size: 1.4rem; font-weight: 800; font-family: 'Fredoka', sans-serif; color: var(--text-main); }
+
+        /* STATUS DA LOJA */
+        .store-status-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; }
+        .status-btn { padding: 12px 8px; border: 2px solid var(--border); background: white; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 0.85rem; color: var(--text-muted); transition: 0.2s; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .status-btn.active-open { background: #e8f8f0; border-color: var(--success); color: #1e8449; }
+        .status-btn.active-closed { background: #fdeaea; border-color: var(--danger); color: #922b21; }
+        .status-btn.active-auto { background: #fef5e7; border-color: var(--warning); color: #b9770e; }
+
+        /* INPUTS E BOTÕES */
+        input, select, textarea { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 10px; font-family: inherit; font-size: 0.95rem; margin-bottom: 12px; outline: none; background: #fffaf4; }
+        input:focus, select:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(189, 123, 76, 0.15); }
+        label { font-size: 0.85rem; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px; }
+
+        .btn-primary { width: 100%; background: var(--primary); color: white; border: none; padding: 12px 16px; border-radius: 10px; font-weight: bold; font-size: 0.95rem; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-primary:hover { background: var(--primary-hover); }
+
+        /* NAV NAVEGAÇÃO */
+        .nav-tabs { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 20px; border-bottom: 2px solid var(--border); padding-bottom: 10px; scrollbar-width: none; }
+        .tab-btn { background: transparent; border: none; font-size: 0.95rem; font-weight: 700; color: var(--text-muted); padding: 8px 16px; border-radius: 8px; cursor: pointer; white-space: nowrap; transition: 0.2s; }
+        .tab-btn.active { background: var(--secondary); color: white; }
+
+        /* LISTA DE PRODUTOS */
+        .product-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-bottom: 1px solid var(--border); transition: 0.2s; }
+        .product-item.paused { opacity: 0.65; background: #f9f4ef; }
+        .product-thumb { width: 55px; height: 55px; border-radius: 10px; object-fit: cover; background: #f0e2d2; flex-shrink: 0; }
+        .product-details { flex: 1; }
+        .product-details h4 { font-size: 0.95rem; color: var(--text-main); }
+        .type-badge { font-size: 0.75rem; background: #f4e6d6; color: var(--secondary); padding: 2px 8px; border-radius: 6px; font-weight: 700; display: inline-block; margin-top: 2px; }
+
+        /* 🔘 RECURSO 1: BOTÃO PAUSAR/ATIVAR */
+        .btn-toggle-active { border: none; padding: 6px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: 0.2s; }
+        .btn-toggle-active.active { background: #e8f8f0; color: #1e8449; border: 1px solid var(--success); }
+        .btn-toggle-active.paused { background: #fdeaea; color: #922b21; border: 1px solid var(--danger); }
+
+        /* ESTOQUE E EXCLUSÃO */
+        .stock-control { display: flex; align-items: center; gap: 4px; }
+        .stock-btn { width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border); background: white; color: var(--text-main); font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .stock-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
+        .stock-value { font-weight: 800; font-size: 0.95rem; width: 26px; text-align: center; }
+        .stock-low { color: var(--danger); }
+
+        .btn-delete { background: transparent; border: none; color: #bdc3c7; cursor: pointer; font-size: 1.2rem; padding: 6px; transition: 0.2s; }
+        .btn-delete:hover { color: var(--danger); }
+
+        /* 🧮 RECURSO 5: CALCULADORA DE PRECIFICAÇÃO */
+        .calc-box { background: #fffaf4; border: 1px dashed var(--primary); padding: 16px; border-radius: 12px; margin-top: 10px; }
+        .calc-result { font-size: 1.3rem; font-weight: 800; color: #1e8449; font-family: 'Fredoka', sans-serif; margin: 10px 0; }
+
+        /* 🖨️ RECURSO 4: QR CODE DA LOJA */
+        .qr-box { text-align: center; padding: 20px; background: #fffaf4; border-radius: 12px; border: 1px solid var(--border); }
+        .qr-img { width: 200px; height: 200px; margin: 15px auto; display: block; border-radius: 8px; border: 4px solid white; box-shadow: var(--shadow); }
+
+        #status-msg { margin-bottom: 15px; font-weight: 700; text-align: center; padding: 10px; border-radius: 8px; display: none; }
+        .preview-img { width: 100%; height: 140px; object-fit: cover; border-radius: 10px; margin-bottom: 12px; display: none; border: 1px dashed var(--primary); }
     </style>
 </head>
 <body>
 
+    <!-- CABEÇALHO -->
+    <header class="header">
+        <div class="header-content">
+            <h1>Casa da Eliza 🍦</h1>
+            <button id="btn-logout" class="btn-logout" style="display: none;" onclick="fazerLogout()">
+                <i class="ph ph-sign-out"></i> Sair
+            </button>
+        </div>
+    </header>
+
     <div class="container">
-        <h2 style="text-align: center; color: #bd7b4c;">Painel da Eliza 🍦</h2>
-        <div id="status"></div>
+        
+        <div id="status-msg"></div>
 
         <!-- TELA DE LOGIN -->
-        <form id="form-login">
-            <p style="text-align:center; font-size:0.9rem; color:#7c6659;">Faça login para gerenciar o cardápio</p>
-            <input type="email" id="email" placeholder="E-mail" required>
-            <input type="password" id="senha" placeholder="Senha" required>
-            <button type="submit" id="btn-login">Entrar</button>
-        </form>
-
-        <!-- TELA DE CADASTRO (Escondida no início) -->
-        <form id="form-doce" style="display: none;">
-            <p style="text-align:center; font-size:0.9rem; color:#2ecc71;">✅ Login efetuado com sucesso!</p>
-            <hr style="border: 0; border-top: 1px dashed #ccc; margin-bottom: 15px;">
+        <div id="screen-login" class="login-card">
+            <h2>Painel da Eliza</h2>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">Digite suas credenciais de administradora</p>
             
-            <input type="text" id="nome_doce" placeholder="Nome do Produto (ex: Bolo de Pote)" required>
-            <input type="number" id="preco" placeholder="Preço (ex: 8.50)" step="0.01" required>
-            <input type="number" id="quantidade" placeholder="Quantidade em Estoque" required>
+            <form id="form-login">
+                <input type="email" id="login-email" placeholder="E-mail da Eliza" required>
+                <input type="password" id="login-senha" placeholder="Sua senha" required>
+                <button type="submit" id="btn-login-submit" class="btn-primary">
+                    Entrar no Painel <i class="ph ph-arrow-right"></i>
+                </button>
+            </form>
+        </div>
+
+        <!-- DASHBOARD ADMIN (ESCONDIDO INICIALMENTE) -->
+        <div id="screen-dashboard" class="dashboard-grid" style="display: none;">
             
-            <select id="tipo" required>
-                <!-- O "value" deve ser EXATAMENTE igual aos nomes na sua tabela categorias -->
-                <option value="Marmitas">Marmitas</option>
-                <option value="Geladinho Gourmet">Geladinho Gourmet</option>
-                <option value="Bolo no pote">Bolo no pote</option>
-                <option value="Geladinho Natural">Geladinho Natural</option>
-                <option value="Doce">Doce</option>
-                <option value="Sorvete">Sorvete</option>
-            </select>
+            <!-- 📊 RECURSO 3: CARDS DE RESUMO RÁPIDO (ESTOQUE E ALERTAS) -->
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-icon" style="background: #e8f0fe; color: #2980b9;"><i class="ph ph-package"></i></div>
+                    <div class="metric-info">
+                        <h5>Total Cardápio</h5>
+                        <p id="m-total">0</p>
+                    </div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon" style="background: #fef5e7; color: #d35400;"><i class="ph ph-warning"></i></div>
+                    <div class="metric-info">
+                        <h5>Estoque Baixo</h5>
+                        <p id="m-baixo">0</p>
+                    </div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon" style="background: #fdeaea; color: #c0392b;"><i class="ph ph-prohibit"></i></div>
+                    <div class="metric-info">
+                        <h5>Esgotados</h5>
+                        <p id="m-esgotados">0</p>
+                    </div>
+                </div>
+            </div>
 
-            <label style="font-size: 0.9rem; color: #7c6659;">Foto do Produto (Máx 3MB):</label>
-            <input type="file" id="foto" accept="image/png, image/jpeg, image/webp" required>
+            <!-- NAVEGAÇÃO ENTRE ABAS -->
+            <div>
+                <div class="nav-tabs">
+                    <button class="tab-btn active" id="tab-produtos-btn" onclick="mudarAba('produtos')">📦 Produtos</button>
+                    <button class="tab-btn" id="tab-novo-btn" onclick="mudarAba('novo')">➕ Cadastrar Novo</button>
+                    <button class="tab-btn" id="tab-loja-btn" onclick="mudarAba('loja')">⚙️ Status & PIX</button>
+                    <button class="tab-btn" id="tab-calc-btn" onclick="mudarAba('calc')">🧮 Precificação</button>
+                    <button class="tab-btn" id="tab-qr-btn" onclick="mudarAba('qr')">🖨️ QR Code</button>
+                </div>
 
-            <button type="submit" id="btn-salvar">Adicionar ao Cardápio</button>
-        </form>
+                <!-- ABA 1: LISTA DE PRODUTOS E PAUSA RÁPIDA -->
+                <div id="tab-produtos" class="card">
+                    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                        <input type="text" id="search-admin" placeholder="Buscar produto por nome ou categoria..." onkeyup="filtrarProdutosAdmin()" style="margin-bottom: 0;">
+                    </div>
+
+                    <div id="lista-produtos-admin">
+                        <p style="text-align: center; color: var(--text-muted); padding: 20px;">Carregando produtos...</p>
+                    </div>
+                </div>
+
+                <!-- ABA 2: CADASTRO DE PRODUTO COM PREVIEW DE FOTO -->
+                <div id="tab-novo" class="card" style="display: none;">
+                    <div class="card-title"><i class="ph ph-plus-circle" style="color:var(--primary);"></i> Cadastrar Novo Produto</div>
+                    
+                    <form id="form-cadastrar-doce">
+                        <label>Nome do Produto:</label>
+                        <input type="text" id="p-nome" placeholder="Ex: Bolo de Pote Ninho com Nutella" required>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <div>
+                                <label>Preço de Venda (R$):</label>
+                                <input type="number" id="p-preco" step="0.01" placeholder="8.50" required>
+                            </div>
+                            <div>
+                                <label>Estoque Inicial:</label>
+                                <input type="number" id="p-qtd" placeholder="10" required>
+                            </div>
+                        </div>
+
+                        <label>Categoria:</label>
+                        <select id="p-tipo" required>
+                            <option value="Marmitas">Marmitas</option>
+                            <option value="Geladinho Gourmet">Geladinho Gourmet</option>
+                            <option value="Bolo no pote">Bolo no pote</option>
+                            <option value="Geladinho Natural">Geladinho Natural</option>
+                            <option value="Doce">Doce</option>
+                            <option value="Sorvete">Sorvete</option>
+                        </select>
+
+                        <div style="display: flex; gap: 20px; margin-bottom: 15px;">
+                            <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                                <input type="checkbox" id="p-promocao" style="width: auto; margin:0;"> ★ Em Promoção
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                                <input type="checkbox" id="p-novidade" style="width: auto; margin:0;"> ✨ Novidade
+                            </label>
+                        </div>
+
+                        <label>Foto do Produto (Máx 3MB):</label>
+                        <input type="file" id="p-foto" accept="image/png, image/jpeg, image/webp" onchange="previewImagem(this)" required>
+                        <img id="img-preview" class="preview-img" alt="Preview da imagem">
+
+                        <button type="submit" id="btn-salvar-produto" class="btn-primary">
+                            <i class="ph ph-check-circle"></i> Adicionar ao Cardápio
+                        </button>
+                    </form>
+                </div>
+
+                <!-- ABA 3: CONFIGURAÇÃO DE LOJA & RECURSO 2: PIX -->
+                <div id="tab-loja" class="card" style="display: none;">
+                    <div class="card-title"><i class="ph ph-storefront" style="color: var(--primary);"></i> Status do Atendimento</div>
+                    
+                    <div class="store-status-options">
+                        <button type="button" id="st-aberta" class="status-btn" onclick="alterarStatusLoja('aberta')">
+                            <i class="ph ph-circle-wavy-check" style="font-size: 1.4rem;"></i> Aberta
+                        </button>
+                        <button type="button" id="st-fechada" class="status-btn" onclick="alterarStatusLoja('fechada')">
+                            <i class="ph ph-x-circle" style="font-size: 1.4rem;"></i> Fechada
+                        </button>
+                        <button type="button" id="st-auto" class="status-btn" onclick="alterarStatusLoja('automatico')">
+                            <i class="ph ph-clock" style="font-size: 1.4rem;"></i> Automático
+                        </button>
+                    </div>
+
+                    <label for="loja-aviso">Aviso / Recado na tela do cliente:</label>
+                    <input type="text" id="loja-aviso" placeholder="Ex: Fechado às quartas-feiras ou Voltamos às 14h">
+                    <button type="button" onclick="salvarAvisoLoja()" class="btn-primary" style="margin-bottom: 25px;">
+                        Salvar Recado
+                    </button>
+
+                    <hr style="border:0; border-top: 1px dashed var(--border); margin-bottom: 20px;">
+
+                    <!-- RECURSO 2: CHAVE PIX PARA WHATSAPP -->
+                    <div class="card-title"><i class="ph ph-qr-code" style="color: var(--primary);"></i> Configuração do Pix</div>
+                    <label>Chave Pix da Eliza (CPF, CNPJ, E-mail ou Celular):</label>
+                    <input type="text" id="pix-chave" placeholder="Ex:anajuliatp03@gmail.com">
+                    
+                    <label>Titular da Conta / Nome que aparece no Pix:</label>
+                    <input type="text" id="pix-titular" placeholder="Ex: Ana Julia Toriani Pessoa / Casa da Eliza">
+
+                    <button type="button" onclick="salvarPixLoja()" class="btn-primary">
+                        <i class="ph ph-floppy-disk"></i> Salvar Dados do Pix
+                    </button>
+                </div>
+
+                <!-- ABA 4: RECURSO 5: CALCULADORA DE PRECIFICAÇÃO E LUCRO -->
+                <div id="tab-calc" class="card" style="display: none;">
+                    <div class="card-title"><i class="ph ph-calculator" style="color: var(--primary);"></i> Calculadora de Preço de Venda</div>
+                    <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 15px;">Descubra por quanto vender cada doce ou marmita garantindo seu lucro!</p>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div>
+                            <label>Custo Ingredientes + Embalagem (R$):</label>
+                            <input type="number" id="c-custo" step="0.01" placeholder="4.50" oninput="calcularPrecoIdeal()">
+                        </div>
+                        <div>
+                            <label>Margem de Lucro Desejada (%):</label>
+                            <input type="number" id="c-margem" value="100" placeholder="100" oninput="calcularPrecoIdeal()">
+                        </div>
+                    </div>
+
+                    <div class="calc-box">
+                        <div style="font-size:0.85rem; color:var(--text-muted); font-weight:700;">Preço Sugerido para o Cardápio:</div>
+                        <div id="calc-sugerido" class="calc-result">R$ 0,00</div>
+                        <div style="font-size:0.85rem; color:var(--text-muted);">Lucro Bruto por Unidade: <strong id="calc-lucro" style="color:#1e8449;">R$ 0,00</strong></div>
+                    </div>
+
+                    <button type="button" onclick="usarPrecoNaCriacao()" class="btn-primary" style="margin-top: 15px;">
+                        <i class="ph ph-arrow-right"></i> Usar Este Preço no Cadastro
+                    </button>
+                </div>
+
+                <!-- ABA 5: RECURSO 4: GERADOR DE QR CODE PARA IMPRESSÃO -->
+                <div id="tab-qr" class="card" style="display: none;">
+                    <div class="card-title"><i class="ph ph-printer" style="color: var(--primary);"></i> QR Code do Cardápio</div>
+                    <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 15px;">Imprima esse QR Code e cole nas embalagens de marmita e sacolas de doces!</p>
+
+                    <div class="qr-box">
+                        <img id="qr-code-img" class="qr-img" src="" alt="QR Code da Loja">
+                        <p style="font-size:0.85rem; font-weight:bold; color:var(--secondary);" id="qr-link-text">https://casadaeliza.vercel.app</p>
+                    </div>
+
+                    <button type="button" onclick="imprimirQRCode()" class="btn-primary" style="margin-top: 15px;">
+                        <i class="ph ph-printer"></i> Imprimir QR Code da Loja
+                    </button>
+                </div>
+
+            </div>
+
+        </div>
+
     </div>
 
     <script>
         // 🔗 CONEXÃO COM O SUPABASE
-const SUPABASE_URL = "https://idnrvhldncaigjsfuagm.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlkbnJ2aGxkbmNhaWdqc2Z1YWdtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMyMTg3MzYsImV4cCI6MjEwODc5NDczNn0.eZMfvc6KFHGKOkSce06xP3U8JM9_VklQqX73Jxosdmw";
-        
-        let tokenDeAcesso = ""; // Vai guardar o crachá da Eliza
+        const SUPABASE_URL = "https://idnrvhldncaigjsfuagm.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlkbnJ2aGxkbmNhaWdqc2Z1YWdtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMyMTg3MzYsImV4cCI6MjEwODc5NDczNn0.eZMfvc6KFHGKOkSce06xP3U8JM9_VklQqX73Jxosdmw";
 
-        const formLogin = document.getElementById('form-login');
-        const formDoce = document.getElementById('form-doce');
-        const statusDiv = document.getElementById('status');
+        let tokenDeAcesso = sessionStorage.getItem('eliza_token') || "";
+        let listaProdutosGlobal = [];
+        let estadoLojaGlobal = null;
+        let precoCalculadoSugerido = 0;
 
-        // --- 1. FAZER LOGIN ---
-        formLogin.addEventListener('submit', async (e) => {
+        window.addEventListener('DOMContentLoaded', () => {
+            if (tokenDeAcesso) mostrarDashboard();
+        });
+
+        function exibirMensagem(texto, tipo = 'sucesso') {
+            const statusDiv = document.getElementById('status-msg');
+            statusDiv.innerText = texto;
+            statusDiv.style.display = 'block';
+            statusDiv.style.background = tipo === 'sucesso' ? '#e8f8f0' : '#fdeaea';
+            statusDiv.style.color = tipo === 'sucesso' ? '#1e8449' : '#922b21';
+            statusDiv.style.border = `1px solid ${tipo === 'sucesso' ? '#2ecc71' : '#e74c3c'}`;
+            setTimeout(() => { statusDiv.style.display = 'none'; }, 4000);
+        }
+
+        // --- AUTH ---
+        document.getElementById('form-login').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const btnLogin = document.getElementById('btn-login');
-            btnLogin.innerText = "Autenticando...";
+            const btn = document.getElementById('btn-login-submit');
+            btn.innerText = "Autenticando...";
 
             try {
                 const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
                     method: 'POST',
-                    headers: {
-                        'apikey': SUPABASE_KEY,
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        email: document.getElementById('email').value,
-                        password: document.getElementById('senha').value
+                        email: document.getElementById('login-email').value,
+                        password: document.getElementById('login-senha').value
                     })
                 });
 
                 const data = await res.json();
-                if (!res.ok) throw new Error(data.error_description || "Erro no login");
+                if (!res.ok) throw new Error(data.error_description || "Login falhou");
 
-                tokenDeAcesso = data.access_token; // Guarda o JWT!
-                
-                // Esconde login e mostra cadastro
-                formLogin.style.display = "none";
-                formDoce.style.display = "block";
-                statusDiv.innerText = "";
+                tokenDeAcesso = data.access_token;
+                sessionStorage.setItem('eliza_token', tokenDeAcesso);
+                mostrarDashboard();
+                exibirMensagem("Bem-vinda, Eliza!");
 
             } catch (erro) {
-                statusDiv.innerText = "❌ E-mail ou senha incorretos.";
-                statusDiv.style.color = "#d63031";
-                btnLogin.innerText = "Entrar";
+                exibirMensagem("E-mail ou senha incorretos.", "erro");
+                btn.innerHTML = 'Entrar no Painel <i class="ph ph-arrow-right"></i>';
             }
         });
 
-        // --- 2. SALVAR PRODUTO ---
-        formDoce.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btnSalvar = document.getElementById('btn-salvar');
-            btnSalvar.disabled = true;
-            btnSalvar.innerText = "Salvando produto...";
-            statusDiv.innerText = "1/2: Fazendo upload da foto...";
-            statusDiv.style.color = "#0984e3";
+        function fazerLogout() {
+            sessionStorage.removeItem('eliza_token');
+            tokenDeAcesso = "";
+            document.getElementById('screen-dashboard').style.display = 'none';
+            document.getElementById('btn-logout').style.display = 'none';
+            document.getElementById('screen-login').style.display = 'block';
+        }
 
-            const fotoFile = document.getElementById('foto').files[0];
-            const extensao = fotoFile.name.split('.').pop();
-            const nomeUnicoFoto = `doce_${Date.now()}.${extensao}`;
+        function mostrarDashboard() {
+            document.getElementById('screen-login').style.display = 'none';
+            document.getElementById('screen-dashboard').style.display = 'grid';
+            document.getElementById('btn-logout').style.display = 'flex';
+            carregarStatusLoja();
+            carregarProdutosAdmin();
+            gerarQRCodeLoja();
+        }
+
+        // --- LOJA STATUS & PIX ---
+        async function carregarStatusLoja() {
+            try {
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/loja?id=eq.1`, {
+                    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${tokenDeAcesso}` }
+                });
+                const dados = await res.json();
+                if (dados && dados.length > 0) {
+                    estadoLojaGlobal = dados[0];
+                    atualizarBotoesStatus(estadoLojaGlobal.abertura_manual);
+                    document.getElementById('loja-aviso').value = estadoLojaGlobal.aviso || "";
+                    document.getElementById('pix-chave').value = localStorage.getItem('eliza_pix_chave') || "";
+                    document.getElementById('pix-titular').value = localStorage.getItem('eliza_pix_titular') || "";
+                }
+            } catch (err) {
+                console.error("Erro ao carregar loja", err);
+            }
+        }
+
+        function atualizarBotoesStatus(modo) {
+            document.getElementById('st-aberta').className = `status-btn ${modo === 'aberta' ? 'active-open' : ''}`;
+            document.getElementById('st-fechada').className = `status-btn ${modo === 'fechada' ? 'active-closed' : ''}`;
+            document.getElementById('st-auto').className = `status-btn ${modo === 'automatico' ? 'active-auto' : ''}`;
+        }
+
+        async function alterarStatusLoja(novoModo) {
+            atualizarBotoesStatus(novoModo);
+            try {
+                await fetch(`${SUPABASE_URL}/rest/v1/loja?id=eq.1`, {
+                    method: 'PATCH',
+                    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${tokenDeAcesso}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ abertura_manual: novoModo })
+                });
+                exibirMensagem("Status da loja atualizado!");
+            } catch (err) { exibirMensagem("Erro ao atualizar status", "erro"); }
+        }
+
+        async function salvarAvisoLoja() {
+            const avisoTexto = document.getElementById('loja-aviso').value;
+            try {
+                await fetch(`${SUPABASE_URL}/rest/v1/loja?id=eq.1`, {
+                    method: 'PATCH',
+                    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${tokenDeAcesso}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ aviso: avisoTexto })
+                });
+                exibirMensagem("Recado salvo!");
+            } catch (err) { exibirMensagem("Erro ao salvar recado", "erro"); }
+        }
+
+        function salvarPixLoja() {
+            const chave = document.getElementById('pix-chave').value;
+            const titular = document.getElementById('pix-titular').value;
+            localStorage.setItem('eliza_pix_chave', chave);
+            localStorage.setItem('eliza_pix_titular', titular);
+            exibirMensagem("Dados do Pix salvos com sucesso!");
+        }
+
+        // --- PRODUTOS, ESTOQUE & MÉTRICAS ---
+        async function carregarProdutosAdmin() {
+            const container = document.getElementById('lista-produtos-admin');
+            try {
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/produtos?select=*&order=id.desc`, {
+                    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${tokenDeAcesso}` }
+                });
+                listaProdutosGlobal = await res.json();
+                atualizarMetricasEstoque(listaProdutosGlobal);
+                renderizarProdutosAdmin(listaProdutosGlobal);
+            } catch (err) {
+                container.innerHTML = `<p style="color:var(--danger); text-align:center;">Erro ao carregar produtos.</p>`;
+            }
+        }
+
+        // RECURSO 3: MÉTRICAS DE RESUMO RÁPIDO
+        function atualizarMetricasEstoque(lista) {
+            const total = lista.length;
+            const baixos = lista.filter(p => p.quantidade > 0 && p.quantidade <= 3).length;
+            const esgotados = lista.filter(p => p.quantidade === 0 || p.promocao === false && p.ativo === false).length;
+
+            document.getElementById('m-total').innerText = total;
+            document.getElementById('m-baixo').innerText = baixos;
+            document.getElementById('m-esgotados').innerText = esgotados;
+        }
+
+        function renderizarProdutosAdmin(lista) {
+            const container = document.getElementById('lista-produtos-admin');
+            if (lista.length === 0) {
+                container.innerHTML = `<p style="text-align:center; color:var(--text-muted); padding:20px;">Nenhum produto cadastrado.</p>`;
+                return;
+            }
+
+            container.innerHTML = lista.map(item => {
+                const isPausado = item.quantidade === 0;
+                return `
+                <div class="product-item ${isPausado ? 'paused' : ''}">
+                    <img src="${item.imagem || '/assets/logo-casa-da-eliza.png'}" class="product-thumb" alt="${item.nome}">
+                    <div class="product-details">
+                        <h4>${item.nome}</h4>
+                        <div style="font-weight: 700; color: var(--secondary); font-size: 0.85rem;">
+                            R$ ${parseFloat(item.preco).toFixed(2).replace('.', ',')}
+                        </div>
+                        <span class="type-badge">${item.tipo}</span>
+                    </div>
+
+                    <!-- RECURSO 1: BOTÃO PAUSAR / ATIVAR -->
+                    <button type="button" class="btn-toggle-active ${isPausado ? 'paused' : 'active'}" onclick="alternarPausaProduto(${item.id}, ${item.quantidade})">
+                        <i class="ph ${isPausado ? 'ph-pause-circle' : 'ph-check-circle'}"></i>
+                        ${isPausado ? 'Pausado' : 'Ativo'}
+                    </button>
+
+                    <div class="stock-control">
+                        <button type="button" class="stock-btn" onclick="alterarEstoque(${item.id}, ${item.quantidade - 1})">-</button>
+                        <span class="stock-value ${item.quantidade <= 3 ? 'stock-low' : ''}">${item.quantidade}</span>
+                        <button type="button" class="stock-btn" onclick="alterarEstoque(${item.id}, ${item.quantidade + 1})">+</button>
+                    </div>
+
+                    <button type="button" class="btn-delete" title="Excluir produto" onclick="deletarProduto(${item.id}, '${item.nome}')">
+                        <i class="ph ph-trash"></i>
+                    </button>
+                </div>
+            `}).join('');
+        }
+
+        async function alternarPausaProduto(id, qtdAtual) {
+            const novaQtd = qtdAtual > 0 ? 0 : 10;
+            await alterarEstoque(id, novaQtd);
+        }
+
+        async function alterarEstoque(id, novaQtd) {
+            if (novaQtd < 0) return;
+            const prod = listaProdutosGlobal.find(p => p.id === id);
+            if (prod) prod.quantidade = novaQtd;
+            
+            atualizarMetricasEstoque(listaProdutosGlobal);
+            renderizarProdutosAdmin(listaProdutosGlobal);
 
             try {
-                // PASSO A: Enviar Foto
-                const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/fotos-eliza/${nomeUnicoFoto}`, {
+                await fetch(`${SUPABASE_URL}/rest/v1/produtos?id=eq.${id}`, {
+                    method: 'PATCH',
+                    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${tokenDeAcesso}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ quantidade: novaQtd })
+                });
+            } catch (err) { carregarProdutosAdmin(); }
+        }
+
+        async function deletarProduto(id, nome) {
+            if (!confirm(`Tem certeza que deseja apagar "${nome}" do cardápio?`)) return;
+
+            try {
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/produtos?id=eq.${id}`, {
+                    method: 'DELETE',
+                    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${tokenDeAcesso}` }
+                });
+                if (res.ok) {
+                    exibirMensagem(`Produto "${nome}" removido.`);
+                    carregarProdutosAdmin();
+                }
+            } catch (err) { exibirMensagem("Erro ao excluir produto", "erro"); }
+        }
+
+        function filtrarProdutosAdmin() {
+            const termo = document.getElementById('search-admin').value.toLowerCase();
+            const filtrados = listaProdutosGlobal.filter(p => p.nome.toLowerCase().includes(termo) || p.tipo.toLowerCase().includes(termo));
+            renderizarProdutosAdmin(filtrados);
+        }
+
+        // --- RECURSO 5: CALCULADORA DE PRECIFICAÇÃO ---
+        function calcularPrecoIdeal() {
+            const custo = parseFloat(document.getElementById('c-custo').value) || 0;
+            const margem = parseFloat(document.getElementById('c-margem').value) || 0;
+
+            const lucro = custo * (margem / 100);
+            precoCalculadoSugerido = custo + lucro;
+
+            document.getElementById('calc-sugerido').innerText = `R$ ${precoCalculadoSugerido.toFixed(2).replace('.', ',')}`;
+            document.getElementById('calc-lucro').innerText = `R$ ${lucro.toFixed(2).replace('.', ',')}`;
+        }
+
+        function usarPrecoNaCriacao() {
+            if (precoCalculadoSugerido <= 0) return alert("Digite o custo do produto primeiro!");
+            document.getElementById('p-preco').value = precoCalculadoSugerido.toFixed(2);
+            mudarAba('novo');
+            exibirMensagem("Preço sugerido preenchido no cadastro!");
+        }
+
+        // --- RECURSO 4: QR CODE DA LOJA ---
+        function gerarQRCodeLoja() {
+            const linkLoja = window.location.origin.includes('vercel.app') 
+                ? window.location.origin 
+                : "https://casadaeliza.vercel.app";
+            
+            document.getElementById('qr-link-text').innerText = linkLoja;
+            document.getElementById('qr-code-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(linkLoja)}`;
+        }
+
+        function imprimirQRCode() {
+            window.print();
+        }
+
+        // --- CADASTRO ---
+        function previewImagem(input) {
+            const preview = document.getElementById('img-preview');
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        document.getElementById('form-cadastrar-doce').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btn-salvar-produto');
+            btn.disabled = true;
+            btn.innerText = "1/2: Enviando foto...";
+
+            const fotoFile = document.getElementById('p-foto').files[0];
+            const extensao = fotoFile.name.split('.').pop();
+            const nomeFotoUnico = `item_${Date.now()}.${extensao}`;
+
+            try {
+                const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/fotos-eliza/${nomeFotoUnico}`, {
                     method: 'POST',
-                    headers: {
-                        'apikey': SUPABASE_KEY,
-                        'Authorization': `Bearer ${tokenDeAcesso}`, // Passa o crachá!
-                        'Content-Type': fotoFile.type
-                    },
+                    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${tokenDeAcesso}`, 'Content-Type': fotoFile.type },
                     body: fotoFile
                 });
 
-                if (!uploadRes.ok) throw new Error("Erro ao subir a foto");
+                if (!uploadRes.ok) throw new Error("Erro no upload da foto");
 
-                const linkDaImagem = `${SUPABASE_URL}/storage/v1/object/public/fotos-eliza/${nomeUnicoFoto}`;
+                const urlImagem = `${SUPABASE_URL}/storage/v1/object/public/fotos-eliza/${nomeFotoUnico}`;
+                btn.innerText = "2/2: Salvando produto...";
 
-                // PASSO B: Salvar dados na tabela
-                statusDiv.innerText = "2/2: Cadastrando no banco...";
-
-                const produtoNovo = {
-                    nome: document.getElementById('nome_doce').value,
-                    preco: parseFloat(document.getElementById('preco').value),
-                    quantidade: parseInt(document.getElementById('quantidade').value),
-                    tipo: document.getElementById('tipo').value,
-                    imagem: linkDaImagem
+                const novoProduto = {
+                    nome: document.getElementById('p-nome').value,
+                    preco: parseFloat(document.getElementById('p-preco').value),
+                    quantidade: parseInt(document.getElementById('p-qtd').value),
+                    tipo: document.getElementById('p-tipo').value,
+                    promocao: document.getElementById('p-promocao').checked,
+                    novidade: document.getElementById('p-novidade').checked,
+                    imagem: urlImagem
                 };
 
                 const dbRes = await fetch(`${SUPABASE_URL}/rest/v1/produtos`, {
                     method: 'POST',
-                    headers: {
-                        'apikey': SUPABASE_KEY,
-                        'Authorization': `Bearer ${tokenDeAcesso}`, // Passa o crachá!
-                        'Content-Type': 'application/json',
-                        'Prefer': 'return=minimal'
-                    },
-                    body: JSON.stringify(produtoNovo)
+                    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${tokenDeAcesso}`, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+                    body: JSON.stringify(novoProduto)
                 });
 
-                if (!dbRes.ok) throw new Error("Erro ao salvar o produto");
+                if (!dbRes.ok) throw new Error("Erro ao salvar produto");
 
-                statusDiv.innerText = "🎉 Produto adicionado ao cardápio!";
-                statusDiv.style.color = "#2ecc71";
-                formDoce.reset();
+                exibirMensagem("🎉 Produto adicionado com sucesso!");
+                document.getElementById('form-cadastrar-doce').reset();
+                document.getElementById('img-preview').style.display = 'none';
+                
+                mudarAba('produtos');
+                carregarProdutosAdmin();
 
-            } catch (erro) {
-                console.error(erro);
-                statusDiv.innerText = "❌ Ocorreu um erro. Tente novamente.";
-                statusDiv.style.color = "#d63031";
+            } catch (err) {
+                exibirMensagem("Falha ao salvar produto. Verifique se a foto tem menos de 3MB.", "erro");
             } finally {
-                btnSalvar.disabled = false;
-                btnSalvar.innerText = "Adicionar ao Cardápio";
+                btn.disabled = false;
+                btn.innerHTML = '<i class="ph ph-check-circle"></i> Adicionar ao Cardápio';
             }
         });
+
+        // --- NAVEGAÇÃO DE ABAS ---
+        function mudarAba(aba) {
+            const abas = ['produtos', 'novo', 'loja', 'calc', 'qr'];
+            abas.forEach(a => {
+                document.getElementById(`tab-${a}`).style.display = a === aba ? 'block' : 'none';
+                const btn = document.getElementById(`tab-${a}-btn`);
+                if (btn) btn.className = `tab-btn ${a === aba ? 'active' : ''}`;
+            });
+        }
     </script>
 </body>
 </html>
