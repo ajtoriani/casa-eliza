@@ -34,7 +34,7 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
     <style>
-        /* --- CONFIGURACOES VISUAIS --- */
+        /* --- CONFIGURAÇÕES VISUAIS --- */
         :root {
             --bg-body: #f7efe5;
             --bg-card: #fffaf4;
@@ -176,7 +176,23 @@
         .qty-display { font-family: var(--font-heading); font-weight: 600; font-size: 1.1rem; text-align: center; color: var(--text-main); }
         .qty-display.hidden { opacity: 0; display: none; }
 
-        /* --- CONTATO E LOCALIZACAO --- */
+        /* --- CARDS DE PERSONALIZAÇÃO E CONTATO --- */
+        .custom-plan-card {
+            background: var(--bg-card); border-radius: var(--radius); padding: 20px; text-align: center;
+            margin-bottom: 20px; border: 2px solid var(--primary); box-shadow: var(--shadow); position: relative; z-index: 2;
+        }
+        .custom-plan-badge {
+            background: #f4e6d6; color: var(--secondary); display: inline-flex; align-items: center; gap: 6px;
+            padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 800; text-transform: uppercase; margin-bottom: 10px;
+        }
+        .custom-plan-btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            background: var(--primary); color: white; padding: 12px 20px; border-radius: 50px;
+            text-decoration: none; font-weight: bold; font-family: var(--font-heading); font-size: 0.95rem;
+            box-shadow: 0 4px 12px rgba(189, 123, 76, 0.3); transition: transform 0.2s; margin-top: 10px;
+        }
+        .custom-plan-btn:hover { transform: scale(1.03); }
+
         .contact-card {
             background: #f6e8d8; border-radius: var(--radius); padding: 20px; text-align: center;
             margin-bottom: 20px; border: 1px solid #ddbea5; position: relative; z-index: 2;
@@ -185,7 +201,7 @@
             display: inline-flex; align-items: center; gap: 8px;
             background: var(--secondary); color: white; padding: 10px 20px; border-radius: 50px;
             text-decoration: none; font-weight: bold; margin-top: 10px;
-            transition: transform 0.2s; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3);
+            transition: transform 0.2s; box-shadow: 0 4px 10px rgba(74, 38, 15, 0.25);
         }
         .contact-btn:hover { transform: scale(1.05); }
 
@@ -271,7 +287,7 @@
 
             <div class="search-container">
                 <i class="ph ph-magnifying-glass search-icon"></i>
-                <input type="text" id="search-input" class="search-input" placeholder="Buscar sabor ou prato (ex: Ninho, Frango)..." onkeyup="searchMenu()">
+                <input type="text" id="search-input" class="search-input" placeholder="Buscar sabor ou prato (ex: Ninho, Frango)..." oninput="searchMenu()" onkeyup="searchMenu()">
             </div>
         </header>
 
@@ -295,10 +311,25 @@
             <div id="dynamic-sections"></div>
         </div>
 
+        <!-- CARD 1: MARMITAS SEMANAIS & DIETAS PERSONALIZADAS -->
+        <div class="custom-plan-card">
+            <div class="custom-plan-badge">
+                <i class="ph ph-calendar-check" style="font-size: 1.1rem; color: var(--primary);"></i> Encomendas Semanais
+            </div>
+            <h3 style="font-size: 1.25rem; color: var(--text-main); margin-bottom: 8px;">Marmitas Semanais & Dietas Personalizadas</h3>
+            <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 12px; line-height: 1.4;">
+                Monte seu pacote semanal exclusivo alinhado com sua dieta, restrições alimentares ou objetivos. Comida caseira, saudável e do seu jeito!
+            </p>
+            <a href="https://wa.me/5511981849807?text=Ol%C3%A1!%20Gostaria%20de%20saber%20mais%20sobre%20as%20marmitas%20semanais%20e%20solicitar%20um%20card%C3%A1pio%20personalizado." target="_blank" class="custom-plan-btn">
+                <i class="ph ph-whatsapp-logo" style="font-size: 1.2rem;"></i> Pedir Cardápio Personalizado
+            </a>
+        </div>
+
+        <!-- CARD 2: DÚVIDAS E ATENDIMENTO -->
         <div class="contact-card">
             <h3 style="margin-bottom: 5px; color: #009432;">Dúvidas?</h3>
             <p style="font-size: 0.9rem; color: #636e72;">Fale direto com a gente sem compromisso.</p>
-            <a href="https://wa.me/+5511981849807" target="_blank" class="contact-btn">
+            <a href="https://wa.me/5511981849807?text=Ol%C3%A1!%20Tenho%20uma%20d%C3%BAvida%20ou%20pedido%20especial%20sobre%20a%20Casa%20da%20Eliza." target="_blank" class="contact-btn">
                 <i class="ph ph-whatsapp-logo" style="font-size: 1.2rem;"></i> Chamar no WhatsApp
             </a>
         </div>
@@ -359,12 +390,12 @@
     </div>
 
     <script>
-        // --- VARIAVEIS GERAIS ---
+        // --- VARIÁVEIS GERAIS ---
         const WHATSAPP_NUMBER = "5511981849807";
 
-       // 🔗 CONEXÃO COM O SUPABASE
-const SUPABASE_URL = "https://idnrvhldncaigjsfuagm.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlkbnJ2aGxkbmNhaWdqc2Z1YWdtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMyMTg3MzYsImV4cCI6MjEwODc5NDczNn0.eZMfvc6KFHGKOkSce06xP3U8JM9_VklQqX73Jxosdmw";
+        // 🔗 CONEXÃO COM O SUPABASE
+        const SUPABASE_URL = "https://idnrvhldncaigjsfuagm.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlkbnJ2aGxkbmNhaWdqc2Z1YWdtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMyMTg3MzYsImV4cCI6MjEwODc5NDczNn0.eZMfvc6KFHGKOkSce06xP3U8JM9_VklQqX73Jxosdmw";
         
         const supabaseHeaders = {
             'apikey': SUPABASE_KEY,
@@ -398,7 +429,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
         let cart = {}; 
         const CART_KEY = 'elizaCart_v1'; 
 
-        // --- INICIALIZACAO ---
+        // --- INICIALIZAÇÃO ---
         function init() {
             checkOpeningHours(); 
             carregarTudoDaAPI(); 
@@ -486,7 +517,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
             }
         }
 
-        // --- RENDERIZACAO ---
+        // --- RENDERIZAÇÃO ---
         function renderizarTudo() {
             document.getElementById('loading-message').style.display = 'none';
 
@@ -695,7 +726,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
             document.getElementById('modal-total').innerText = `R$ ${total.toFixed(2).replace('.', ',')}`;
         }
 
-        // --- FINALIZACAO WHATSAPP ---
+        // --- FINALIZAÇÃO WHATSAPP ---
         function finalizeOrder() {
             if (Object.keys(cart).length === 0) return alert("Adicione itens antes de pedir!");
 
@@ -747,7 +778,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
                     } else if (loja.abertura_manual === 'fechada') {
                         isOpen = false;
                     } else {
-                        // Modo automatico por horario
+                        // Modo automático por horário
                         const now = new Date();
                         const spNow = new Date(now.toLocaleString("en-US", { timeZone: "America/Sao_Paulo" }));
                         const currentHour = spNow.getHours();
@@ -788,21 +819,38 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
             applyStoreStatus(isOpen, isWednesday ? 'Fechado às quartas-feiras.' : 'Atendimento das 12h às 20h.');
         }
 
-        // --- BUSCA E FILTROS ---
-        function searchMenu() {
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-            document.querySelector('.filter-btn[onclick="filterMenu(\'all\')"]').classList.add('active');
+        // --- BUSCA E FILTROS COMPATÍVEIS COM ACENTOS ---
+        function normalizarTexto(texto) {
+            return texto.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+        }
 
-            const query = document.getElementById('search-input').value.toLowerCase();
+        function searchMenu() {
+            const queryRaw = document.getElementById('search-input').value;
+            const query = normalizarTexto(queryRaw);
+
+            // Reseta a seleção visual de botões para 'Todos' se o usuário estiver digitando
+            if (query.length > 0) {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                const btnAll = document.querySelector('.filter-btn[onclick="filterMenu(\'all\')"]');
+                if (btnAll) btnAll.classList.add('active');
+            }
+
             const cards = document.querySelectorAll('.product-card');
             const sections = document.querySelectorAll('.menu-section');
 
             cards.forEach(card => {
-                const title = card.querySelector('h3').innerText.toLowerCase();
-                if (title.includes(query)) card.style.display = 'flex';
-                else card.style.display = 'none';
+                const titleElement = card.querySelector('h3');
+                if (!titleElement) return;
+                
+                const title = normalizarTexto(titleElement.innerText);
+                if (title.includes(query)) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
             });
 
+            // Oculta seções vazias
             sections.forEach(sec => {
                 const hasVisible = Array.from(sec.querySelectorAll('.product-card')).some(c => c.style.display !== 'none');
                 sec.style.display = hasVisible ? 'block' : 'none';
@@ -813,18 +861,18 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
             const sections = document.querySelectorAll('.menu-section');
             document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
             
-            const targetBtn = event ? event.target : document.querySelector(`.filter-btn[onclick="filterMenu('${category}')"]`);
+            const targetBtn = window.event && window.event.target ? window.event.target : document.querySelector(`.filter-btn[onclick="filterMenu('${category}')"]`);
             if(targetBtn) targetBtn.classList.add('active');
 
             document.getElementById('search-input').value = '';
             
-            gsap.to(sections, { opacity: 0, duration: 0.2, onComplete: () => {
+            gsap.to(sections, { opacity: 0, duration: 0.15, onComplete: () => {
                 sections.forEach(sec => {
                     sec.querySelectorAll('.product-card').forEach(c => c.style.display = 'flex');
                     if (category === 'all' || sec.dataset.category === category) sec.style.display = 'block';
                     else sec.style.display = 'none';
                 });
-                gsap.to(sections, { opacity: 1, duration: 0.3 });
+                gsap.to(sections, { opacity: 1, duration: 0.25 });
             }});
         }
 
