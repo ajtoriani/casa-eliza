@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel da Eliza - Casa da Eliza</title>
+    <style>
+        body { font-family: 'Nunito', sans-serif; background: #f7efe5; padding: 20px; color: #43210f; }
+        .container { max-width: 400px; margin: 0 auto; background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        input, select, button { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; font-size: 1rem; }
+        button { background: #bd7b4c; color: white; font-weight: bold; cursor: pointer; border: none; transition: 0.2s; }
+        button:hover { background: #a66a3e; }
+        #status { font-weight: bold; text-align: center; margin-bottom: 15px; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2 style="text-align: center; color: #bd7b4c;">Painel da Eliza 🍦</h2>
+        <div id="status"></div>
+
+        <!-- TELA DE LOGIN -->
+        <form id="form-login">
+            <p style="text-align:center; font-size:0.9rem; color:#7c6659;">Faça login para gerenciar o cardápio</p>
+            <input type="email" id="email" placeholder="E-mail" required>
+            <input type="password" id="senha" placeholder="Senha" required>
+            <button type="submit" id="btn-login">Entrar</button>
+        </form>
+
+        <!-- TELA DE CADASTRO (Escondida no início) -->
+        <form id="form-doce" style="display: none;">
+            <p style="text-align:center; font-size:0.9rem; color:#2ecc71;">✅ Login efetuado com sucesso!</p>
+            <hr style="border: 0; border-top: 1px dashed #ccc; margin-bottom: 15px;">
+            
+            <input type="text" id="nome_doce" placeholder="Nome do Produto (ex: Bolo de Pote)" required>
+            <input type="number" id="preco" placeholder="Preço (ex: 8.50)" step="0.01" required>
+            <input type="number" id="quantidade" placeholder="Quantidade em Estoque" required>
+            
+            <select id="tipo" required>
+                <!-- O "value" deve ser EXATAMENTE igual aos nomes na sua tabela categorias -->
+                <option value="Marmitas">Marmitas</option>
+                <option value="Geladinho Gourmet">Geladinho Gourmet</option>
+                <option value="Bolo no pote">Bolo no pote</option>
+                <option value="Geladinho Natural">Geladinho Natural</option>
+                <option value="Doce">Doce</option>
+                <option value="Sorvete">Sorvete</option>
+            </select>
+
+            <label style="font-size: 0.9rem; color: #7c6659;">Foto do Produto (Máx 3MB):</label>
+            <input type="file" id="foto" accept="image/png, image/jpeg, image/webp" required>
+
+            <button type="submit" id="btn-salvar">Adicionar ao Cardápio</button>
+        </form>
+    </div>
+
+    <script>
+        // 🔗 COLOQUE SUAS CHAVES AQUI
+        const SUPABASE_URL = "https://idnrvhldncaigjsfuagm.supabase.co/rest/v1/";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlkbnJ2aGxkbmNhaWdqc2Z1YWdtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMyMTg3MzYsImV4cCI6MjEwODc5NDczNn0.eZMfvc6KFHGKOkSce06xP3U8JM9_VklQqX73Jxosdmw";
+        
+        let tokenDeAcesso = ""; // Vai guardar o crachá da Eliza
+
+        const formLogin = document.getElementById('form-login');
+        const formDoce = document.getElementById('form-doce');
+        const statusDiv = document.getElementById('status');
+
+        // --- 1. FAZER LOGIN ---
+        formLogin.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btnLogin = document.getElementById('btn-login');
+            btnLogin.innerText = "Autenticando...";
+
+            try {
+                const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: document.getElementById('email').value,
+                        password: document.getElementById('senha').value
+                    })
+                });
+
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error_description || "Erro no login");
+
+                tokenDeAcesso = data.access_token; // Guarda o JWT!
+                
+                // Esconde login e mostra cadastro
+                formLogin.style.display = "none";
+                formDoce.style.display = "block";
+                statusDiv.innerText = "";
+
+            } catch (erro) {
+                statusDiv.innerText = "❌ E-mail ou senha incorretos.";
+                statusDiv.style.color = "#d63031";
+                btnLogin.innerText = "Entrar";
+            }
+        });
+
+        // --- 2. SALVAR PRODUTO ---
+        formDoce.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btnSalvar = document.getElementById('btn-salvar');
+            btnSalvar.disabled = true;
+            btnSalvar.innerText = "Salvando produto...";
+            statusDiv.innerText = "1/2: Fazendo upload da foto...";
+            statusDiv.style.color = "#0984e3";
+
+            const fotoFile = document.getElementById('foto').files[0];
+            const extensao = fotoFile.name.split('.').pop();
+            const nomeUnicoFoto = `doce_${Date.now()}.${extensao}`;
+
+            try {
+                // PASSO A: Enviar Foto
+                const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/fotos-eliza/${nomeUnicoFoto}`, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${tokenDeAcesso}`, // Passa o crachá!
+                        'Content-Type': fotoFile.type
+                    },
+                    body: fotoFile
+                });
+
+                if (!uploadRes.ok) throw new Error("Erro ao subir a foto");
+
+                const linkDaImagem = `${SUPABASE_URL}/storage/v1/object/public/fotos-eliza/${nomeUnicoFoto}`;
+
+                // PASSO B: Salvar dados na tabela
+                statusDiv.innerText = "2/2: Cadastrando no banco...";
+
+                const produtoNovo = {
+                    nome: document.getElementById('nome_doce').value,
+                    preco: parseFloat(document.getElementById('preco').value),
+                    quantidade: parseInt(document.getElementById('quantidade').value),
+                    tipo: document.getElementById('tipo').value,
+                    imagem: linkDaImagem
+                };
+
+                const dbRes = await fetch(`${SUPABASE_URL}/rest/v1/produtos`, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${tokenDeAcesso}`, // Passa o crachá!
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=minimal'
+                    },
+                    body: JSON.stringify(produtoNovo)
+                });
+
+                if (!dbRes.ok) throw new Error("Erro ao salvar o produto");
+
+                statusDiv.innerText = "🎉 Produto adicionado ao cardápio!";
+                statusDiv.style.color = "#2ecc71";
+                formDoce.reset();
+
+            } catch (erro) {
+                console.error(erro);
+                statusDiv.innerText = "❌ Ocorreu um erro. Tente novamente.";
+                statusDiv.style.color = "#d63031";
+            } finally {
+                btnSalvar.disabled = false;
+                btnSalvar.innerText = "Adicionar ao Cardápio";
+            }
+        });
+    </script>
+</body>
+</html>
